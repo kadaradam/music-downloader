@@ -5,7 +5,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "bun run --watch src/index.ts",
     "build": "bun build src/index.ts --outdir ./build --target bun",
-    "start": "bun index.js"
+    "start": "bun index.js",
+    "format": "prettier --write src",
+    "format:check": "prettier --check src"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.0.2",
@@ -15,7 +17,8 @@
   },
   "devDependencies": {
     "@types/amqplib": "^0.10.5",
-    "bun-types": "latest"
+    "bun-types": "latest",
+    "prettier": "^3.2.5"
   },
   "module": "src/index.js"
 }
