@@ -13,6 +13,7 @@ services:
     environment:
       PORT: 3000
       RABBIT_MQ_URL: amqp://host.docker.internal:5672
+      DB_URL: postgres://developer:password@postgres:5432/yt-mp3
     depends_on:
       rabbitmq:
         condition: service_healthy
