@@ -13,7 +13,7 @@
     "@elysiajs/cors": "^1.0.2",
     "@elysiajs/static": "^1.0.3",
     "amqplib": "^0.10.4",
-    "elysia": "latest"
+    "elysia": "^1.0.21"
   },
   "devDependencies": {
     "@types/amqplib": "^0.10.5",
