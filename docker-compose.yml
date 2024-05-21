@@ -16,10 +16,31 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:15.2
+    container_name: postgres
+    hostname: postgres
+    ports:
+        - 5432:5432
+    environment:
+        POSTGRES_DB: yt-mp3
+        POSTGRES_USER: developer
+        POSTGRES_PASSWORD: password
+    volumes:
+        - ytmp3-db-data:/var/lib/postgresql/data
+    # Do not start DB migration until the DB is up
+    healthcheck:
+        test: ["CMD", "pg_isready", "-U", "developer", "-d", "yt-mp3"]
+        interval: 5s
+        timeout: 30s
+        retries: 3
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
-    container_name: "rabbitmq"
+    container_name: rabbitmq
     hostname: rabbitmq
     ports:
       - 5672:5672
@@ -38,3 +59,6 @@ services:
 networks:
   rabbitmq_network:
     driver: bridge
+
+volumes:
+  ytmp3-db-data:
