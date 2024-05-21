@@ -1,3 +1,4 @@
+import { Channel, Message } from 'amqplib';
 import { config } from '../../config';
 import { YouTubeConvertService } from '../../services/YouTubeConvertService';
 import AmqpSingleton from '../AmqpSingleton';
@@ -15,17 +16,27 @@ export abstract class ProcessYouTubeConsumer {
 
     console.log(`Waiting for messages in ${queue_processYouTube}`);
 
-    channel.consume(queue_processYouTube, async (msg) => {
-      if (msg === null) {
-        console.log('Consumer cancelled by server');
-        return;
-      }
+    channel.consume(queue_processYouTube, (msg) =>
+      this.handleMessage(channel, msg),
+    );
+  }
 
+  private static async handleMessage(
+    channel: Channel,
+    msg: Message | null,
+  ): Promise<void> {
+    if (msg === null) {
+      console.log('Consumer cancelled by server');
+      return;
+    }
+
+    try {
       const response = msg?.content.toString();
 
       console.log(`Received ${response}`);
 
-      // Wrong data received
+      // Should not occur
+      // Wrong data received, ack the message to remove it from the queue
       if (!response) {
         channel.ack(msg);
         return;
@@ -36,8 +47,10 @@ export abstract class ProcessYouTubeConsumer {
       const outputStoragePath = await YouTubeConvertService.toMp3(fileId, url);
 
       console.log(`File saved to: ${outputStoragePath}`);
-
+    } catch (error) {
+      console.error('Failed to process the message', error);
+    } finally {
       channel.ack(msg);
-    });
+    }
   }
 }
