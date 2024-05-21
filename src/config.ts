@@ -12,7 +12,7 @@ const configType = t.Object(
     PORT: t_CastStringToNum({ default: 3000 }),
     NODE_ENV: t.String({ default: 'development' }),
     DB_URL: t.String({
-      default: 'postgres://postgres:password@localhost:5432/ytmp3',
+      default: 'postgres://developer:password@localhost:5432/yt-mp3',
     }),
     RABBIT_MQ_URL: t.String({ default: 'amqp://localhost' }),
     MAX_QUEUE_ITEMS: t_CastStringToNum({ default: 5 }),
