@@ -1,4 +1,5 @@
 import { Elysia, t } from 'elysia';
+import { StatusCodes } from 'http-status-codes';
 import { ConvertVideoService } from '../services/ConvertVideoService';
 
 const ConvertVideoController = new Elysia({ prefix: '/convert-video' })
@@ -13,7 +14,7 @@ const ConvertVideoController = new Elysia({ prefix: '/convert-video' })
         return { fileId };
       } catch (err) {
         throw new Response('Failed to download the file', {
-          status: 500,
+          status: StatusCodes.INTERNAL_SERVER_ERROR,
         });
       }
     },
