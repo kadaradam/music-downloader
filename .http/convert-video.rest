@@ -1,4 +1,5 @@
 @baseUrl = http://localhost:3000/api
+@videoId = 5bh99b
 
 # @name convertVideo
 # @description Convert a video from a URL to a downloadable format
@@ -11,8 +12,13 @@ Content-Type: application/json
 
 ###
 
-@videoId = v1rx5h
-
 # @name getVideo
 # @description Get a video by its ID
 GET {{baseUrl}}/convert-video/{{videoId}} HTTP/1.1
+
+###
+
+# @name downloadVideo
+# @description Download a video by its ID
+GET {{baseUrl}}/convert-video/{{videoId}}/download HTTP/1.1
+Content-Type: audio/mpeg
