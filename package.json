@@ -9,7 +9,7 @@
     "format": "prettier --write src",
     "format:check": "prettier --check src",
     "db:generate": "drizzle-kit generate",
-    "db:migreate": "drizzle-kit migrate",
+    "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
@@ -17,6 +17,7 @@
     "@elysiajs/static": "^1.0.3",
     "amqplib": "^0.10.4",
     "drizzle-orm": "^0.30.10",
+    "drizzle-typebox": "^0.1.1",
     "elysia": "^1.0.21",
     "http-status-codes": "^2.3.0",
     "pg": "^8.11.5"

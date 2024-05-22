@@ -1,6 +1,6 @@
 import { Elysia, t } from 'elysia';
-import { StatusCodes } from 'http-status-codes';
 import { ConvertVideoService } from '../services/ConvertVideoService';
+import { selectConvertJobSchema } from '../db/schema';
 
 const ConvertVideoController = new Elysia({ prefix: '/convert-video' })
   .post(
@@ -8,40 +8,51 @@ const ConvertVideoController = new Elysia({ prefix: '/convert-video' })
     async ({ body }) => {
       const { url } = body;
 
-      try {
-        const fileId = await ConvertVideoService.toMp3(url);
+      const convertJob = await ConvertVideoService.toMp3(url);
 
-        return { fileId };
-      } catch (err) {
-        throw new Response('Failed to download the file', {
-          status: StatusCodes.INTERNAL_SERVER_ERROR,
-        });
-      }
+      return convertJob;
     },
     {
       body: t.Object({
         url: t.String(),
       }),
-      response: t.Object({
-        fileId: t.String(),
-      }),
+      response: selectConvertJobSchema,
     },
   )
   .get(
-    '/:fileId',
-    ({ params }) => {
+    '/:fileId/download',
+    async ({ params }) => {
       const { fileId } = params;
 
-      const file = ConvertVideoService.getFile(fileId);
+      const { title, file } = await ConvertVideoService.getFile(fileId);
 
       return new Response(file, {
-        headers: { 'Content-Type': 'audio/mpeg' },
+        headers: {
+          'Content-Type': 'audio/mpeg',
+          'Content-Disposition': `attachment; filename="${title}.mp3"`,
+        },
       });
     },
     {
       params: t.Object({
         fileId: t.String(),
       }),
+    },
+  )
+  .get(
+    '/:fileId',
+    async ({ params }) => {
+      const { fileId } = params;
+
+      const convertJob = await ConvertVideoService.findOne(fileId);
+
+      return convertJob;
+    },
+    {
+      params: t.Object({
+        fileId: t.String(),
+      }),
+      response: selectConvertJobSchema,
     },
   );
 

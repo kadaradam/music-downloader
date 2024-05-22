@@ -3,6 +3,9 @@ import { config } from '../../config';
 import { YouTubeConvertService } from '../../services/YouTubeConvertService';
 import AmqpSingleton from '../AmqpSingleton';
 import { queue_processYouTube } from '../names';
+import { db } from '../../db/drizzle';
+import { convertJobs } from '../../db/schema';
+import { eq } from 'drizzle-orm';
 
 export abstract class ProcessYouTubeConsumer {
   static async listen(): Promise<void> {
@@ -30,6 +33,8 @@ export abstract class ProcessYouTubeConsumer {
       return;
     }
 
+    let tempFileId = '';
+
     try {
       const response = msg?.content.toString();
 
@@ -44,11 +49,24 @@ export abstract class ProcessYouTubeConsumer {
 
       const { fileId, url } = JSON.parse(response);
 
+      tempFileId = fileId;
       const outputStoragePath = await YouTubeConvertService.toMp3(fileId, url);
+
+      await db
+        .update(convertJobs)
+        .set({ status: 'completed', finishedAt: new Date() })
+        .where(eq(convertJobs.fileId, fileId));
 
       console.log(`File saved to: ${outputStoragePath}`);
     } catch (error) {
       console.error('Failed to process the message', error);
+
+      if (tempFileId) {
+        await db
+          .update(convertJobs)
+          .set({ status: 'failed', finishedAt: new Date() })
+          .where(eq(convertJobs.fileId, tempFileId));
+      }
     } finally {
       channel.ack(msg);
     }
