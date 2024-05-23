@@ -6,9 +6,10 @@ import { queue_processYouTube } from '../names';
 import { db } from '../../db/drizzle';
 import { convertJobs } from '../../db/schema';
 import { eq } from 'drizzle-orm';
+import Elysia from 'elysia';
 
 export abstract class ProcessYouTubeConsumer {
-  static async listen(): Promise<void> {
+  static async listen(app: Elysia): Promise<void> {
     const channel = await AmqpSingleton.connect();
 
     channel.prefetch(config.MAX_QUEUE_ITEMS);
@@ -20,11 +21,12 @@ export abstract class ProcessYouTubeConsumer {
     console.log(`Waiting for messages in ${queue_processYouTube}`);
 
     channel.consume(queue_processYouTube, (msg) =>
-      this.handleMessage(channel, msg),
+      this.handleMessage(app, channel, msg),
     );
   }
 
   private static async handleMessage(
+    app: Elysia,
     channel: Channel,
     msg: Message | null,
   ): Promise<void> {
@@ -69,6 +71,9 @@ export abstract class ProcessYouTubeConsumer {
       }
     } finally {
       channel.ack(msg);
+
+      // Notify the
+      app.server?.publish(tempFileId, 'finished');
     }
   }
 }
