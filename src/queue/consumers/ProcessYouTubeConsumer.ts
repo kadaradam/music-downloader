@@ -6,10 +6,10 @@ import { queue_processYouTube } from '../names';
 import { db } from '../../db/drizzle';
 import { convertJobs } from '../../db/schema';
 import { eq } from 'drizzle-orm';
-import Elysia from 'elysia';
+import { AppType } from '../..';
 
 export abstract class ProcessYouTubeConsumer {
-  static async listen(app: Elysia): Promise<void> {
+  static async listen(app: AppType): Promise<void> {
     const channel = await AmqpSingleton.connect();
 
     channel.prefetch(config.MAX_QUEUE_ITEMS);
@@ -26,7 +26,7 @@ export abstract class ProcessYouTubeConsumer {
   }
 
   private static async handleMessage(
-    app: Elysia,
+    app: AppType,
     channel: Channel,
     msg: Message | null,
   ): Promise<void> {
