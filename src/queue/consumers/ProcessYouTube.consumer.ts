@@ -54,26 +54,31 @@ export abstract class ProcessYouTubeConsumer {
       tempFileId = fileId;
       const outputStoragePath = await YouTubeService.downloadMp3(fileId, url);
 
-      await db
+      const updatedJob = await db
         .update(convertJobs)
         .set({ status: 'completed', finishedAt: new Date() })
-        .where(eq(convertJobs.fileId, fileId));
+        .where(eq(convertJobs.fileId, fileId))
+        .returning();
 
       console.log(`File saved to: ${outputStoragePath}`);
+
+      app.server?.publish(tempFileId, JSON.stringify(updatedJob));
     } catch (error) {
       console.error('Failed to process the message', error);
 
       if (tempFileId) {
-        await db
+        const failedJob = await db
           .update(convertJobs)
           .set({ status: 'failed', finishedAt: new Date() })
-          .where(eq(convertJobs.fileId, tempFileId));
+          .where(eq(convertJobs.fileId, tempFileId))
+          .returning();
+
+        app.server?.publish(tempFileId, JSON.stringify(failedJob));
       }
     } finally {
       channel.ack(msg);
 
       // Notify the
-      app.server?.publish(tempFileId, 'finished');
     }
   }
 }
