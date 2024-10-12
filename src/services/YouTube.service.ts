@@ -30,7 +30,17 @@ export abstract class YouTubeService {
       console.log(`Starting download for ${url}...`);
 
       Bun.spawn(
-        ['yt-dlp', url, '-o', outputFilePath, '-x', '--audio-format', 'mp3'],
+        [
+          'yt-dlp',
+          url,
+          '-o',
+          outputFilePath,
+          '-x',
+          '--audio-format',
+          'mp3',
+          '--retries',
+          '3',
+        ],
         {
           cwd: './scripts/downloader/outputs',
           async onExit(_, exitCode) {
