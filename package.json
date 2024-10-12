@@ -13,13 +13,13 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@bogeychan/elysia-logger": "^0.0.21",
-    "@elysiajs/cors": "^1.0.2",
+    "@bogeychan/elysia-logger": "^0.1.4",
+    "@elysiajs/cors": "^1.1.1",
     "@elysiajs/static": "^1.0.3",
     "amqplib": "^0.10.4",
     "drizzle-orm": "^0.30.10",
     "drizzle-typebox": "^0.1.1",
-    "elysia": "^1.0.21",
+    "elysia": "^1.1.20",
     "http-status-codes": "^2.3.0",
     "pg": "^8.11.5"
   },
