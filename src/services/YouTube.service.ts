@@ -1,7 +1,29 @@
 import { unlink } from 'fs/promises';
+import { getFilePath } from '../libs/utils';
 
-export abstract class YouTubeConvertService {
-  static async toMp3(fileId: string, url: string): Promise<string> {
+export abstract class YouTubeService {
+  static async getVideoMetadata(url: string): Promise<YouTubeMetadata> {
+    const response = await fetch(
+      `https://noembed.com/embed?dataType=json&url=${url}`,
+      {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+
+    const data = (await response.json()) as YouTubeMetadata;
+
+    const videoId = data.thumbnail_url.split('/')[4];
+
+    return {
+      ...data,
+      id: videoId,
+    };
+  }
+
+  static async downloadMp3(fileId: string, url: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
       const outputFilePath = `${fileId}.mp3`;
 
@@ -15,7 +37,7 @@ export abstract class YouTubeConvertService {
             if (exitCode !== 0) {
               console.log('Download failed with code', exitCode);
 
-              const fileToRemove = `${process.cwd()}/scripts/downloader/outputs/${fileId}.webm`;
+              const fileToRemove = getFilePath(fileId);
 
               console.log('Cleaning up the file', fileToRemove);
 

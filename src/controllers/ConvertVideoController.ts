@@ -1,14 +1,15 @@
 import { Elysia, t } from 'elysia';
-import { ConvertVideoService } from '../services/ConvertVideoService';
+import { YouTubeConvertService } from '../services/YouTubeConvert.service';
+import { ConvertJobService } from '../services/ConvertJob.service';
 import { selectConvertJobSchema } from '../db/schema';
 
-const ConvertVideoController = new Elysia({ prefix: '/convert-video' })
+const ConvertVideoController = new Elysia({ prefix: '/convert' })
   .post(
-    '/',
+    '/youtube',
     async ({ body }) => {
       const { url } = body;
 
-      const convertJob = await ConvertVideoService.toMp3(url);
+      const convertJob = await YouTubeConvertService.toMp3(url);
 
       return convertJob;
     },
@@ -24,7 +25,7 @@ const ConvertVideoController = new Elysia({ prefix: '/convert-video' })
     async ({ params }) => {
       const { fileId } = params;
 
-      const { title, file } = await ConvertVideoService.getFile(fileId);
+      const { title, file } = await ConvertJobService.getFile(fileId);
 
       return new Response(file, {
         headers: {
@@ -44,7 +45,7 @@ const ConvertVideoController = new Elysia({ prefix: '/convert-video' })
     async ({ params }) => {
       const { fileId } = params;
 
-      const convertJob = await ConvertVideoService.findOne(fileId);
+      const convertJob = await ConvertJobService.findOne(fileId);
 
       return convertJob;
     },

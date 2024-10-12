@@ -1,6 +1,6 @@
 import { Channel, Message } from 'amqplib';
 import { config } from '../../config';
-import { YouTubeConvertService } from '../../services/YouTubeConvertService';
+import { YouTubeService } from '../../services/YouTube.service';
 import AmqpSingleton from '../AmqpSingleton';
 import { queue_processYouTube } from '../names';
 import { db } from '../../db/drizzle';
@@ -52,7 +52,7 @@ export abstract class ProcessYouTubeConsumer {
       const { fileId, url } = JSON.parse(response);
 
       tempFileId = fileId;
-      const outputStoragePath = await YouTubeConvertService.toMp3(fileId, url);
+      const outputStoragePath = await YouTubeService.downloadMp3(fileId, url);
 
       await db
         .update(convertJobs)
