@@ -3,6 +3,7 @@ import { ProcessYouTubeProducer } from '../queue/producers/ProcessYouTube.produc
 import { db } from '../db/drizzle';
 import { ConvertJobType, convertJobs } from '../db/schema';
 import { YouTubeService } from './YouTube.service';
+import { ApiError, ApiErrorType } from '../types/ApiError';
 
 export abstract class YouTubeConvertService {
   static async toMp3(url: string): Promise<ConvertJobType> {
@@ -23,9 +24,11 @@ export abstract class YouTubeConvertService {
     } catch (err) {
       console.error('Failed to start convert process', err);
 
-      throw new Response('Failed to start convert process', {
-        status: StatusCodes.INTERNAL_SERVER_ERROR,
-      });
+      throw new ApiError(
+        ApiErrorType.UNEXPECTED_ERROR,
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        'Failed to start convert process',
+      );
     }
   }
 }
