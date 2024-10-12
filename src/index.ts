@@ -3,8 +3,9 @@ import { cors } from '@elysiajs/cors';
 import { logger } from '@bogeychan/elysia-logger';
 import ConvertVideoController from './controllers/ConvertVideoController';
 import { config } from './config';
-import { ProcessYouTubeConsumer } from './queue/consumers/ProcessYouTubeConsumer';
+import { ProcessYouTubeConsumer } from './queue/consumers/ProcessYouTube.consumer';
 import { errorHandler } from './middlewares/ErrorHandler';
+import { StorageCleanUpCron } from './crons/StorageCleanUp.cron';
 
 const port = config.PORT;
 const app = new Elysia()
@@ -30,6 +31,7 @@ const app = new Elysia()
       ws.unsubscribe(fileId);
     },
   })
+  .use(StorageCleanUpCron)
   .listen(port);
 
 console.log(
