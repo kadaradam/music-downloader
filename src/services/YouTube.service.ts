@@ -45,15 +45,19 @@ export abstract class YouTubeService {
           cwd: './scripts/downloader/outputs',
           async onExit(_, exitCode) {
             if (exitCode !== 0) {
-              console.log('Download failed with code', exitCode);
+              try {
+                console.log('Download failed with code', exitCode);
 
-              const fileToRemove = getFilePath(fileId);
+                const fileToRemove = getFilePath(fileId);
 
-              console.log('Cleaning up the file', fileToRemove);
+                console.log('Cleaning up the file', fileToRemove);
 
-              await unlink(fileToRemove);
-
-              return reject('Failed to download the file');
+                await unlink(fileToRemove);
+              } catch (error) {
+                console.error('Failed to remove the file', error);
+              } finally {
+                reject('Failed to download the file');
+              }
             }
 
             console.log('Download completed successfully');
