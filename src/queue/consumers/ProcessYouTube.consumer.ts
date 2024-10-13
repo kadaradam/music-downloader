@@ -62,7 +62,7 @@ export abstract class ProcessYouTubeConsumer {
 
       console.log(`File saved to: ${outputStoragePath}`);
 
-      app.server?.publish(tempFileId, JSON.stringify(updatedJob));
+      app.server?.publish(tempFileId, JSON.stringify(updatedJob[0]));
     } catch (error) {
       console.error('Failed to process the message', error);
 
@@ -73,7 +73,7 @@ export abstract class ProcessYouTubeConsumer {
           .where(eq(convertJobs.fileId, tempFileId))
           .returning();
 
-        app.server?.publish(tempFileId, JSON.stringify(failedJob));
+        app.server?.publish(tempFileId, JSON.stringify(failedJob[0]));
       }
     } finally {
       channel.ack(msg);
