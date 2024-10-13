@@ -18,7 +18,7 @@
     "@elysiajs/cron": "^1.1.1",
     "@elysiajs/static": "^1.0.3",
     "amqplib": "^0.10.4",
-    "drizzle-orm": "^0.30.10",
+    "drizzle-orm": "^0.34.1",
     "drizzle-typebox": "^0.1.1",
     "elysia": "^1.1.20",
     "http-status-codes": "^2.3.0",
