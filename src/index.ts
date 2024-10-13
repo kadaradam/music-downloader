@@ -6,32 +6,16 @@ import { config } from './config';
 import { ProcessYouTubeConsumer } from './queue/consumers/ProcessYouTube.consumer';
 import { errorHandler } from './middlewares/ErrorHandler';
 import { StorageCleanUpCron } from './crons/StorageCleanUp.cron';
+import { NotifyJobCompletedWS } from './websockets/NotifyJobCompleted.websocket';
 
 const port = config.PORT;
 const app = new Elysia()
   .onError(errorHandler)
   .use(logger())
   .use(cors())
-  .get('/', () => Bun.file('public/index.html'))
   .group('/api', (app) => app.use(ConvertVideoController))
-  .ws('/ws/:fileId', {
-    body: t.Null(),
-    params: t.Object({
-      fileId: t.String(),
-    }),
-    response: t.String(),
-    open(ws) {
-      const fileId = ws.data.params.fileId;
-
-      ws.subscribe(fileId);
-    },
-    close(ws) {
-      const fileId = ws.data.params.fileId;
-
-      ws.unsubscribe(fileId);
-    },
-  })
   .use(StorageCleanUpCron)
+  .use(NotifyJobCompletedWS)
   .listen(port);
 
 console.log(
