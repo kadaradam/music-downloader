@@ -36,20 +36,16 @@ export const StorageCleanUpCron = new Elysia().use(
 async function clearOutdatedFile(fileId: string): Promise<void> {
   const fileToRemove = getFilePath(fileId);
 
-  db.transaction(async (tx) => {
-    try {
+  try {
+    await db.transaction(async (tx) => {
       console.log('Cleaning up the file', fileToRemove);
 
       await unlink(fileToRemove);
-      await db.delete(convertJobs).where(eq(convertJobs.fileId, fileId));
+      await tx.delete(convertJobs).where(eq(convertJobs.fileId, fileId));
 
       console.log(`cron: File ${fileToRemove} removed`);
-    } catch (err) {
-      console.error(
-        `Failed to free up storage. Reverting DB... File: ${fileToRemove}`,
-        err,
-      );
-      tx.rollback();
-    }
-  });
+    });
+  } catch (err) {
+    console.error('Failed to free up storage. Reverting DB...', err);
+  }
 }
