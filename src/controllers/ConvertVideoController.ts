@@ -20,6 +20,22 @@ const ConvertVideoController = new Elysia({ prefix: '/convert' })
       response: selectConvertJobSchema,
     },
   )
+  .post(
+    '/youtube/restore',
+    async ({ body }) => {
+      const { fileId } = body;
+
+      const convertJob = await YouTubeConvertService.restoreMp3(fileId);
+
+      return convertJob;
+    },
+    {
+      body: t.Object({
+        fileId: t.String(),
+      }),
+      response: selectConvertJobSchema,
+    },
+  )
   .get(
     '/:fileId/download',
     async ({ params }) => {

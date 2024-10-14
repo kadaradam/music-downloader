@@ -31,7 +31,7 @@ export abstract class ProcessYouTubeConsumer {
     msg: Message | null,
   ): Promise<void> {
     if (msg === null) {
-      console.log('Consumer cancelled by server');
+      console.log('<rabbitmq>: Consumer cancelled by server');
       return;
     }
 
@@ -40,7 +40,7 @@ export abstract class ProcessYouTubeConsumer {
     try {
       const response = msg?.content.toString();
 
-      console.log(`Received ${response}`);
+      console.log(`<rabbitmq>$consumer: Picked up job ${response}`);
 
       // Should not occur
       // Wrong data received, ack the message to remove it from the queue
@@ -60,11 +60,16 @@ export abstract class ProcessYouTubeConsumer {
         .where(eq(convertJobs.fileId, fileId))
         .returning();
 
-      console.log(`File saved to: ${outputStoragePath}`);
+      console.log(
+        `<rabbitmq>$consumer: Job completed. File saved to: ${outputStoragePath}`,
+      );
 
       app.server?.publish(tempFileId, JSON.stringify(updatedJob[0]));
     } catch (error) {
-      console.error('Failed to process the message', error);
+      console.error(
+        '<rabbitmq>$consumer: Failed to process the message',
+        error,
+      );
 
       if (tempFileId) {
         const failedJob = await db

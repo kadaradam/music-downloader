@@ -4,6 +4,7 @@ import { db } from '../db/drizzle';
 import { ConvertJobType, convertJobs } from '../db/schema';
 import { YouTubeService } from './YouTube.service';
 import { ApiError, ApiErrorType } from '../types/ApiError';
+import { and, eq } from 'drizzle-orm';
 
 export abstract class YouTubeConvertService {
   static async toMp3(url: string): Promise<ConvertJobType> {
@@ -30,5 +31,37 @@ export abstract class YouTubeConvertService {
         'Failed to start convert process',
       );
     }
+  }
+
+  static async restoreMp3(fileId: string): Promise<ConvertJobType> {
+    const result = await db
+      .select({ videoId: convertJobs.videoId })
+      .from(convertJobs)
+      .where(
+        and(eq(convertJobs.fileId, fileId), eq(convertJobs.status, 'archived')),
+      )
+      .limit(1);
+
+    if (!result.length) {
+      throw new ApiError(
+        ApiErrorType.NOT_FOUND,
+        StatusCodes.NOT_FOUND,
+        'Video not found',
+      );
+    }
+
+    const updatedJob = await db
+      .update(convertJobs)
+      .set({ status: 'pending' })
+      .where(eq(convertJobs.fileId, fileId))
+      .returning();
+
+    const convertJob = updatedJob[0];
+    const { videoId } = convertJob;
+    const url = `https://www.youtube.com/watch?v=${videoId}`;
+
+    await ProcessYouTubeProducer.sendMessage(fileId, url);
+
+    return convertJob;
   }
 }

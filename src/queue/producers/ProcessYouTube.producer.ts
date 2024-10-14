@@ -17,6 +17,6 @@ export abstract class ProcessYouTubeProducer {
 
     channel.sendToQueue(queue_processYouTube, Buffer.from(message));
 
-    console.log(`Sent ${message}`);
+    console.log(`<rabbitmq>$produccer: Job forwarded ${message}`);
   }
 }
