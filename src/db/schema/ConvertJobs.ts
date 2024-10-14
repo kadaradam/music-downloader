@@ -15,6 +15,7 @@ export const statusEnum = pgEnum('convert_job_status', [
   'pending',
   'completed',
   'failed',
+  'archived',
 ]);
 
 export const convertJobs = pgTable(

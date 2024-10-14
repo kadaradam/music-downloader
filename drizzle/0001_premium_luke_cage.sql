@@ -1,0 +1,1 @@
+ALTER TYPE "convert_job_status" ADD VALUE 'archived';

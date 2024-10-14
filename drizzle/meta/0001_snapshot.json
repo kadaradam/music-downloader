@@ -1,4 +1,6 @@
 {
+  "id": "2a4fa8ea-7a83-45c9-b412-2e253ac5eacb",
+  "prevId": "75a0d806-2692-4f91-a0b7-ba525343843e",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -68,6 +70,7 @@
       },
       "indexes": {
         "file_id_idx": {
+          "name": "file_id_idx",
           "columns": [
             {
               "expression": "file_id",
@@ -76,11 +79,10 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "file_id_idx",
           "isUnique": true,
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {},
@@ -95,7 +97,8 @@
       "values": [
         "pending",
         "completed",
-        "failed"
+        "failed",
+        "archived"
       ]
     },
     "public.convert_job_type": {
@@ -107,12 +110,10 @@
     }
   },
   "schemas": {},
+  "sequences": {},
   "_meta": {
+    "columns": {},
     "schemas": {},
-    "tables": {},
-    "columns": {}
-  },
-  "id": "75a0d806-2692-4f91-a0b7-ba525343843e",
-  "prevId": "00000000-0000-0000-0000-000000000000",
-  "sequences": {}
+    "tables": {}
+  }
 }
