@@ -43,6 +43,11 @@ async function clearOutdatedFile(fileId: string): Promise<void> {
       await unlink(fileToRemove);
       await tx.delete(convertJobs).where(eq(convertJobs.fileId, fileId));
 
+      await tx
+        .update(convertJobs)
+        .set({ status: 'archived' })
+        .where(eq(convertJobs.fileId, fileId));
+
       console.log(`cron: File ${fileToRemove} removed`);
     });
   } catch (err) {
