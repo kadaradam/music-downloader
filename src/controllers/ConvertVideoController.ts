@@ -47,6 +47,7 @@ const ConvertVideoController = new Elysia({ prefix: '/convert' })
         headers: {
           'Content-Type': 'audio/mpeg',
           'Content-Disposition': `attachment; filename="${title}.mp3"`,
+          'Cache-Control': 'public, max-age=86400, s-maxage=86400',
         },
       });
     },
