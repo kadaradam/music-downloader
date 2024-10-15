@@ -3,16 +3,18 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { InfoCircledIcon, ReloadIcon } from '@radix-ui/react-icons';
 import { useGetPageContext } from '../GetPageContext';
+import { usePersistentData } from '@/components/PersistentDataProvider';
 
 export default function RestoreButton({ fileId }: { fileId: string }) {
   const { setConvertJob } = useGetPageContext();
   const { isLoading, mutate: submit } = usePostRestoreConvert();
+  const { add: addPersistentData } = usePersistentData();
 
   const handleRestore = () => {
     submit(fileId, {
       onSuccess: (convertJob) => {
-        console.log(convertJob);
         setConvertJob(convertJob);
+        addPersistentData(convertJob);
       },
     });
   };
