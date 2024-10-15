@@ -22,7 +22,7 @@ services:
 
   db:
     image: postgres:15.2
-    container_name: postgres
+    container_name: postgres-yt-mp3
     hostname: postgres
     ports:
         - 5432:5432
