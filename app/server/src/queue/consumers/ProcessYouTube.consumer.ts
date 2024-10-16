@@ -82,8 +82,6 @@ export abstract class ProcessYouTubeConsumer {
       }
     } finally {
       channel.ack(msg);
-
-      // Notify the
     }
   }
 }

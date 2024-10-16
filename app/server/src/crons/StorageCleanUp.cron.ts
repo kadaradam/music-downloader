@@ -33,6 +33,10 @@ export const StorageCleanUpCron = new Elysia().use(
   }),
 );
 
+/* 
+  Almost useless, but a simple demonstration on
+  how to use db transactions with drizzle
+*/
 async function clearOutdatedFile(fileId: string): Promise<void> {
   const fileToRemove = getFilePath(fileId);
 
@@ -40,7 +44,7 @@ async function clearOutdatedFile(fileId: string): Promise<void> {
     await db.transaction(async (tx) => {
       console.log('Cleaning up the file', fileToRemove);
 
-      await unlink(fileToRemove);
+      await safeUnlink(fileToRemove);
       await tx.delete(convertJobs).where(eq(convertJobs.fileId, fileId));
 
       await tx
@@ -48,9 +52,19 @@ async function clearOutdatedFile(fileId: string): Promise<void> {
         .set({ status: 'archived' })
         .where(eq(convertJobs.fileId, fileId));
 
-      console.log(`cron: File ${fileToRemove} removed`);
+      console.log(`cron: File ${fileToRemove} archived`);
     });
   } catch (err) {
     console.error('Failed to free up storage. Reverting DB...', err);
+  }
+}
+
+async function safeUnlink(filePath: string): Promise<void> {
+  try {
+    await unlink(filePath);
+  } catch (err: any) {
+    if (err?.code !== 'ENOENT') {
+      throw err;
+    }
   }
 }
