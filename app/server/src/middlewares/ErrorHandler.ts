@@ -1,8 +1,8 @@
 import { StatusCodes } from 'http-status-codes';
-import { ApiError, ApiErrorType } from '../types/ApiError';
+import { ApiError, ApiErrorType, ErrorResponse } from '../types/ApiError';
 
 // TODO: Figure out TypeScript definition
-export const errorHandler = ({ code, error, set }: any) => {
+export const errorHandler = ({ code, error, set }: any): ErrorResponse => {
   if (code === 'VALIDATION') {
     // Display the client how to fix the validation error
     return { type: ApiErrorType.VALIDATION_ERROR, message: error.all };

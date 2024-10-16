@@ -10,7 +10,7 @@ export enum ApiErrorType {
 }
 
 export class ApiError extends Error {
-  type: string;
+  type: ApiErrorType;
   status: number;
   message: string;
 
@@ -21,3 +21,8 @@ export class ApiError extends Error {
     this.status = status;
   }
 }
+
+export type ErrorResponse = {
+  type: ApiErrorType;
+  message: string;
+};
