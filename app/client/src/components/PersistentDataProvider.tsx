@@ -31,6 +31,10 @@ export function PersistentDataProvider({
   children: React.ReactNode;
 }) {
   const [recentConverts, setRecentConverts] = useState<ConvertJob[]>(() => {
+    if (typeof window === 'undefined') {
+      return [];
+    }
+
     const recentConverts = localStorage.getItem(RECENT_CONVERTS_KEY);
 
     if (!recentConverts) {
@@ -48,6 +52,10 @@ export function PersistentDataProvider({
 
   const add = (convertJob: ConvertJob) => {
     setRecentConverts((prev) => {
+      if (typeof window === 'undefined') {
+        return prev;
+      }
+
       const itemExists = prev.find((item) => item.id === convertJob.id);
       let newConverts = prev;
 
@@ -68,6 +76,10 @@ export function PersistentDataProvider({
 
   const remove = (id: string) => {
     setRecentConverts((prev) => {
+      if (typeof window === 'undefined') {
+        return prev;
+      }
+
       const newConverts = prev.filter((item) => item.id !== id);
       localStorage.setItem(RECENT_CONVERTS_KEY, JSON.stringify(newConverts));
 
