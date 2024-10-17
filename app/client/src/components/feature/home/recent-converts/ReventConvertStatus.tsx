@@ -5,11 +5,6 @@ import { clsx } from 'clsx';
 const FILE_STALE_TIME_IN_MS = 86400000;
 
 export default function RecentConvertStatus({ item }: { item: ConvertJob }) {
-  // Data can be stale in localStorage
-  const isStale = item.finishedAt
-    ? Date.now() - new Date(item.finishedAt).getTime() > FILE_STALE_TIME_IN_MS
-    : false;
-
   const statusVariants: { [key: string]: string } = {
     completed: 'text-green-700',
     failed: 'text-red-700',
@@ -17,7 +12,12 @@ export default function RecentConvertStatus({ item }: { item: ConvertJob }) {
     archived: 'text-orange-500',
   };
 
-  const status = isStale ? 'archived' : item.status;
+  // Data can be stale in localStorage
+  const isStale = item.finishedAt
+    ? Date.now() - new Date(item.finishedAt).getTime() > FILE_STALE_TIME_IN_MS
+    : false;
+  const isStatusOutdated = item.status === 'completed' && isStale;
+  const status = isStatusOutdated ? 'archived' : item.status;
 
   return <span className={clsx('text-4xl', statusVariants[status])}>•</span>;
 }
