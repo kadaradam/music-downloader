@@ -40,7 +40,7 @@ export default function ConvertJobCard({ item }: { item: ConvertJob }) {
 
   return (
     <Card className="p-7 min-w-96 max-w-2xl">
-      <div className="flex justify-between items-center gap-5 pb-6">
+      <div className="flex items-center gap-5 pb-6">
         <PlayableThumbnail item={item} />
         <h1 className="pb-6 text-2xl font-bold leading-8 break-words">
           {item.title}
