@@ -19,7 +19,7 @@ export default function RecentConverts() {
   }
 
   return (
-    <Card className="lg:absolute lg:left-9 max-h-64 w-full lg:w-auto">
+    <Card className="xl:absolute lg:left-9 max-h-64 w-full max-w-96">
       <h1 className="pb-2 text-xl font-bold leading-8 p-4">
         Recent Conversions
       </h1>
