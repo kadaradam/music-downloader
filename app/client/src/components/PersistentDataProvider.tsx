@@ -1,5 +1,5 @@
 import { ConvertJob } from '@/types/ConvertJob';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 const RECENT_CONVERTS_KEY = 'recent_converts';
 
@@ -30,25 +30,26 @@ export function PersistentDataProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [recentConverts, setRecentConverts] = useState<ConvertJob[]>(() => {
-    if (typeof window === 'undefined') {
-      return [];
-    }
+  const [isMounted, setIsMounted] = useState<boolean>(false);
+  const [recentConverts, setRecentConverts] = useState<ConvertJob[]>([]);
 
-    const recentConverts = localStorage.getItem(RECENT_CONVERTS_KEY);
+  // Load from localStorage after component mounts on client
+  useEffect(() => {
+    setIsMounted(true);
 
-    if (!recentConverts) {
-      return [];
-    }
+    if (typeof window !== 'undefined') {
+      const storedConverts = localStorage.getItem(RECENT_CONVERTS_KEY);
 
-    try {
-      return JSON.parse(recentConverts);
-    } catch (e) {
-      console.error('Failed to parse recent converts from localStorage', e);
-      localStorage.removeItem(RECENT_CONVERTS_KEY);
-      return [];
+      if (storedConverts) {
+        try {
+          setRecentConverts(JSON.parse(storedConverts));
+        } catch (e) {
+          console.error('Failed to parse recent converts from localStorage', e);
+          localStorage.removeItem(RECENT_CONVERTS_KEY);
+        }
+      }
     }
-  });
+  }, []);
 
   const add = (convertJob: ConvertJob) => {
     setRecentConverts((prev) => {
@@ -86,6 +87,11 @@ export function PersistentDataProvider({
       return newConverts;
     });
   };
+
+  // Prevent rendering until the component is mounted
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <AppContext.Provider
