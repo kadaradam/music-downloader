@@ -1,20 +1,11 @@
-import { usePersistentData } from '@/components/PersistentDataProvider';
 import { Card } from '@/components/ui/card';
 import RecentConvertItem from './RecentConvertItem';
+import { useRecentConverts } from '@/hooks/useRecentConverts';
 
 export default function RecentConverts() {
-  const { recentConverts: data } = usePersistentData();
+  const { data: recentConverts } = useRecentConverts();
 
-  /* 
-    Filter out created at 5 seconds ago, to avoid 
-    displaying the new conversion, before navigating to the get page
-   */
-  const recentConverts = data.filter(
-    (convertJob) =>
-      Date.now() - new Date(convertJob.createdAt).getTime() > 5000,
-  );
-
-  if (!recentConverts.length) {
+  if (!recentConverts) {
     return null;
   }
 

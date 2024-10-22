@@ -6,12 +6,12 @@ import ConvertJobCard from './convert-job-card/ConvertJobCard';
 import { useGetPageContext } from './GetPageContext';
 import { useEffect } from 'react';
 import NotFound from '@/app/not-found';
-import { usePersistentData } from '@/components/PersistentDataProvider';
+import { useRecentConverts } from '@/hooks/useRecentConverts';
 
 export default function RenderConvertJobCard({ fileId }: { fileId: string }) {
   const { convertJob, setConvertJob } = useGetPageContext();
   const { loading, data: result, status: resultStatus } = useGetConvert(fileId);
-  const { add: addPersistentData } = usePersistentData();
+  const { add: addPersistentData } = useRecentConverts();
   const status = convertJob?.status;
   const isPending = status === 'pending';
 

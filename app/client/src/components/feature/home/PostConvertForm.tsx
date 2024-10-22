@@ -4,14 +4,14 @@ import { Label } from '@/components/ui/label';
 import { useRouter } from 'next/navigation';
 import { usePostNewConvert } from '@/api/usePostConvert';
 import { validYouTubeUrlPattern } from '@/lib/utils';
-import { usePersistentData } from '@/components/PersistentDataProvider';
+import { useRecentConverts } from '@/hooks/useRecentConverts';
 
 const urlInputPattern = validYouTubeUrlPattern.toString().slice(1, -1);
 
 export default function PostConvertForm() {
   const router = useRouter();
   const { isLoading, mutate: submit } = usePostNewConvert();
-  const { add: addPersistentData } = usePersistentData();
+  const { add: addPersistentData } = useRecentConverts();
 
   async function onSubmit(formData: FormData) {
     const url = formData.get('url') as string;
