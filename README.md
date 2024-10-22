@@ -2,6 +2,16 @@
 
 Easily download your favorite music from YouTube with blazing speed and real-time feedback! Built with **Bun**, **ElysiaJs**, **RabbitMQ**, **Drizzle ORM**, **Next.js**, **ShadCN**, and **WebSockets**, this app delivers a seamless and modern experience.
 
+<p align="center">
+   <img src="./assets/preview_home.png" alt="Home Screen" width="320px"/>
+</p>
+<p align="center">
+   <img src="./assets/preview_job_completed.png" alt="Convert Completed Successfully" width="320px"/>
+</p>
+<p align="center">
+   <img src="./assets//preview_job_archived.png" alt="Audio file archived" width="320px"/>
+</p>
+
 ## 🚀 Features
 
 - **Real-Time Updates**: Track download progress via WebSockets.
