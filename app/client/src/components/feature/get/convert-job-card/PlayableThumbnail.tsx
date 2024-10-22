@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { getYtVideoThumbnail } from '@/lib/utils';
 import { ConvertJob } from '@/types/ConvertJob';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { PauseIcon, PlayIcon } from '@radix-ui/react-icons';
 
 export default function PlayableThumbnail({ item }: { item: ConvertJob }) {
@@ -18,6 +18,26 @@ export default function PlayableThumbnail({ item }: { item: ConvertJob }) {
 
     setIsPlaying((prev) => !prev);
   };
+
+  useEffect(() => {
+    const audio = audioRef.current;
+
+    if (audio) {
+      const handleEnded = () => setIsPlaying(false);
+      const handlePause = () => setIsPlaying(false);
+      const handlePlay = () => setIsPlaying(true);
+
+      audio.addEventListener('ended', handleEnded);
+      audio.addEventListener('pause', handlePause);
+      audio.addEventListener('play', handlePlay);
+
+      return () => {
+        audio.removeEventListener('ended', handleEnded);
+        audio.removeEventListener('pause', handlePause);
+        audio.removeEventListener('play', handlePlay);
+      };
+    }
+  }, [audioRef]);
 
   return (
     <div
