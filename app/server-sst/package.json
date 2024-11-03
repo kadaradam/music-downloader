@@ -16,7 +16,7 @@
     "@aws-sdk/client-sqs": "^3.679.0",
     "@aws-sdk/lib-dynamodb": "^3.679.0",
     "@aws-sdk/s3-request-presigner": "^3.679.0",
-    "sst": "^3.2.65",
+    "sst": "^3.2.73",
     "zod": "^3.23.8"
   },
   "devDependencies": {
