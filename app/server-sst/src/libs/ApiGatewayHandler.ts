@@ -21,7 +21,7 @@ type Handler = (
 export class ApiGatewayRoute {
   private bodyValidator: z.ZodObject<any, any> | null = null;
 
-  useBodyValidator(validator: z.ZodObject<any, any>) {
+  validateBody(validator: z.ZodObject<any, any>) {
     this.bodyValidator = validator;
     return this;
   }
