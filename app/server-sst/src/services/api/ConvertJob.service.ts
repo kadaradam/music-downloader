@@ -38,13 +38,13 @@ export abstract class ConvertJobService {
   }
 
   static async restore(fileId: string): Promise<ConvertJob> {
-    const result = await DBService.find<ConvertJob>(
+    const items = await DBService.find<ConvertJob>(
       Resource.ConvertJobsTable.name,
       { fileId, status: 'archived' },
       { primaryKey: 'fileId' },
     );
 
-    if (!result) {
+    if (!items.length) {
       throw new ApiError(
         ApiErrorType.NOT_FOUND,
         StatusCodes.NOT_FOUND,
