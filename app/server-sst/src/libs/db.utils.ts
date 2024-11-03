@@ -4,10 +4,11 @@ import { ItemProps } from '../types/db.type';
 
 export function convertToDynamoSchema<T>(
   props: ItemProps<T>,
+  { update }: { update: boolean } = { update: false },
 ): Record<string, AttributeValue> {
   return Object.entries(props).reduce(
     (acc, [key, value]) => {
-      acc[key] =
+      acc[update ? `:${key}` : key] =
         typeof value === 'string'
           ? { S: value }
           : typeof value === 'boolean'
@@ -58,4 +59,10 @@ export function dbExpressionValues<T>(
   return Object.fromEntries(
     Object.entries(props).map(([key, value]) => [`:${key}`, value]),
   );
+}
+
+export function dbExpressionNames<T>(
+  props: ItemProps<T>,
+): Record<string, string> {
+  return Object.fromEntries(Object.keys(props).map((key) => [`#${key}`, key]));
 }

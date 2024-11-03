@@ -9,6 +9,7 @@ import {
   convertToDynamoSchema,
   convertToJavaScriptSchema,
   dbExpression,
+  dbExpressionNames,
   dbExpressionValues,
 } from '../libs/db.utils';
 import { ItemProps, NumberItemProp, WithoutId } from '../types/db.type';
@@ -43,7 +44,10 @@ export abstract class DBService {
         TableName: tableName,
         Key: convertToDynamoSchema(lookupKeys),
         UpdateExpression: dbExpression(props, { update: true }),
-        ExpressionAttributeValues: convertToDynamoSchema(props),
+        ExpressionAttributeNames: dbExpressionNames(props),
+        ExpressionAttributeValues: convertToDynamoSchema(props, {
+          update: true,
+        }),
         ReturnValues: 'ALL_NEW',
       }),
     );
