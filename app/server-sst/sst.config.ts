@@ -1,4 +1,5 @@
 /// <reference path="./.sst/platform/config.d.ts" />
+import { MEDIA_BUCKET_KEY_PREFIX } from './src/constants';
 
 export default $config({
   app(input) {
@@ -57,6 +58,13 @@ export default $config({
       link: [convertJobsTable, mediaBucket],
       memory: '128 MB',
       runtime: 'python3.9',
+      layers: ['arn:aws:lambda:eu-central-1:722103386131:layer:ffmpeg:1'],
+      environment: {
+        MEDIA_BUCKET_NAME: mediaBucket.name,
+        MEDIA_BUCKET_KEY_PREFIX,
+        CONVERT_JOB_TABLE_NAME: convertJobsTable.name,
+        IS_PROD: $app.stage === 'production' ? 'true' : 'false',
+      },
     });
 
     return {
