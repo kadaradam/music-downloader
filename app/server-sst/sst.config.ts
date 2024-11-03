@@ -3,60 +3,60 @@
 export default $config({
   app(input) {
     return {
-      name: "server-sst",
-      removal: input?.stage === "production" ? "retain" : "remove",
-      home: "aws",
+      name: 'server-sst',
+      removal: input?.stage === 'production' ? 'retain' : 'remove',
+      home: 'aws',
       providers: {
-        aws: { region: "eu-central-1" },
+        aws: { region: 'eu-central-1' },
       },
     };
   },
   async run() {
-    const convertJobApi = new sst.aws.ApiGatewayV2("ConvertJobApi", {
+    const convertJobApi = new sst.aws.ApiGatewayV2('ConvertJobApi', {
       /*  cors: {
         allowMethods: ["GET", "POST"],
         allowOrigins: ["http://localhost:30001"],
       }, */
     });
     const convertJobQueue = new sst.aws.Queue(
-      "ConvertJobQueue"
+      'ConvertJobQueue',
       /* { fifo: true }, */
     );
-    const convertJobsTable = new sst.aws.Dynamo("ConvertJobsTable", {
+    const convertJobsTable = new sst.aws.Dynamo('ConvertJobsTable', {
       fields: {
-        fileId: "string",
+        fileId: 'string',
       },
-      primaryIndex: { hashKey: "fileId" },
+      primaryIndex: { hashKey: 'fileId' },
     });
-    const mediaBucket = new sst.aws.Bucket("MediaBucket", {
-      access: "public",
+    const mediaBucket = new sst.aws.Bucket('MediaBucket', {
+      access: 'public',
       cors: {
-        allowMethods: ["GET"],
+        allowMethods: ['GET'],
       },
     });
 
-    convertJobApi.route("POST /api/convert/youtube", {
+    convertJobApi.route('POST /api/convert/youtube', {
       link: [convertJobsTable, convertJobQueue],
-      handler: "src/functions/http/convert-job-api.create",
+      handler: 'src/functions/http/convert-job-api.create',
     });
-    convertJobApi.route("POST /api/convert/youtube/restore", {
+    convertJobApi.route('POST /api/convert/youtube/restore', {
       link: [convertJobsTable, convertJobQueue],
-      handler: "src/functions/http/convert-job-api.restore",
+      handler: 'src/functions/http/convert-job-api.restore',
     });
-    convertJobApi.route("GET /api/convert/{fileId}", {
+    convertJobApi.route('GET /api/convert/{fileId}', {
       link: [convertJobsTable],
-      handler: "src/functions/http/convert-job-api.get",
+      handler: 'src/functions/http/convert-job-api.get',
     });
-    convertJobApi.route("GET /api/convert/{fileId}/download", {
+    convertJobApi.route('GET /api/convert/{fileId}/download', {
       link: [mediaBucket, convertJobsTable],
-      handler: "src/functions/http/convert-job-api.download",
+      handler: 'src/functions/http/convert-job-api.download',
     });
 
     convertJobQueue.subscribe({
-      handler: "src/functions/queue/py/convert-queue-subscriber.handler",
+      handler: 'src/functions/queue/py/convert-queue-subscriber.handler',
       link: [convertJobsTable, mediaBucket],
-      memory: "512 MB",
-      runtime: "python3.9",
+      memory: '128 MB',
+      runtime: 'python3.9',
     });
 
     return {

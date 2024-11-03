@@ -1,4 +1,4 @@
-export type WithoutId<T> = Omit<T, "id">;
+export type WithoutId<T> = Omit<T, 'id'>;
 export type ItemProps<T> = Partial<Record<keyof T, number | string | boolean>>;
 export type NumberItemProp<T> = Extract<
   keyof T,

@@ -1,14 +1,14 @@
-import { APIGatewayProxyResultV2 } from "aws-lambda";
+import { APIGatewayProxyResultV2 } from 'aws-lambda';
 
 export class ApiResponse {
   private statusCode: number = 200;
   private headers: { [key: string]: string } = {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   };
   private body: string;
 
   constructor(body: Object | string) {
-    this.body = typeof body === "string" ? body : JSON.stringify(body, null, 2);
+    this.body = typeof body === 'string' ? body : JSON.stringify(body, null, 2);
   }
 
   setStatus(status: number): this {

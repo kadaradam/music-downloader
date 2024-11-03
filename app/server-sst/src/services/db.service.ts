@@ -2,15 +2,16 @@ import {
   DynamoDBClient,
   PutItemCommand,
   UpdateItemCommand,
-} from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, QueryCommand } from "@aws-sdk/lib-dynamodb";
+} from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb';
+
 import {
   convertToDynamoSchema,
   convertToJavaScriptSchema,
   dbExpression,
   dbExpressionValues,
-} from "../libs/db.utils";
-import { ItemProps, NumberItemProp, WithoutId } from "../types/db.type";
+} from '../libs/db.utils';
+import { ItemProps, NumberItemProp, WithoutId } from '../types/db.type';
 
 const client = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
@@ -25,8 +26,8 @@ export abstract class DBService {
       new PutItemCommand({
         TableName: tableName,
         Item: convertToDynamoSchema(newItem),
-        ReturnValues: "ALL_OLD",
-      })
+        ReturnValues: 'ALL_OLD',
+      }),
     );
 
     return newItem as T;
@@ -35,7 +36,7 @@ export abstract class DBService {
   static async updateOne<T>(
     tableName: string,
     lookupKeys: ItemProps<T>,
-    props: ItemProps<T>
+    props: ItemProps<T>,
   ): Promise<T> {
     const data = await client.send(
       new UpdateItemCommand({
@@ -43,13 +44,13 @@ export abstract class DBService {
         Key: convertToDynamoSchema(lookupKeys),
         UpdateExpression: dbExpression(props, { update: true }),
         ExpressionAttributeValues: convertToDynamoSchema(props),
-        ReturnValues: "ALL_NEW",
-      })
+        ReturnValues: 'ALL_NEW',
+      }),
     );
 
     // Should not happen
     if (!data.Attributes) {
-      throw new Error("Item not found");
+      throw new Error('Item not found');
     }
 
     return convertToJavaScriptSchema(data.Attributes) as T;
@@ -58,7 +59,7 @@ export abstract class DBService {
   static async find<T>(
     tableName: string,
     lookupKeys: ItemProps<T>,
-    selectFields: Array<keyof T> | undefined = undefined
+    selectFields: Array<keyof T> | undefined = undefined,
   ): Promise<T[]> {
     const data = await client.send(
       new QueryCommand({
@@ -66,9 +67,9 @@ export abstract class DBService {
         KeyConditionExpression: dbExpression(lookupKeys),
         ExpressionAttributeValues: dbExpressionValues(lookupKeys),
         ProjectionExpression: selectFields
-          ? selectFields.join(", ")
+          ? selectFields.join(', ')
           : undefined,
-      })
+      }),
     );
 
     return data.Items as T[];
@@ -76,14 +77,14 @@ export abstract class DBService {
 
   static async remove<T>(
     tableName: string,
-    lookupKeys: ItemProps<T>
+    lookupKeys: ItemProps<T>,
   ): Promise<boolean> {
     await client.send(
       new QueryCommand({
         TableName: tableName,
         KeyConditionExpression: dbExpression(lookupKeys),
         ExpressionAttributeValues: dbExpressionValues(lookupKeys),
-      })
+      }),
     );
 
     return true;
@@ -93,7 +94,7 @@ export abstract class DBService {
     tableName: string,
     lookupKeys: ItemProps<T>,
     prop: NumberItemProp<T>,
-    value: number = 1
+    value: number = 1,
   ): Promise<T> {
     const propName = prop as string;
     const data = await client.send(
@@ -102,13 +103,13 @@ export abstract class DBService {
         Key: convertToDynamoSchema(lookupKeys),
         UpdateExpression: `SET #${propName} = ${propName} + :inc`,
         ExpressionAttributeNames: { [`#${propName}`]: propName },
-        ExpressionAttributeValues: { ":inc": { N: value.toString() } },
-        ReturnValues: "ALL_NEW",
-      })
+        ExpressionAttributeValues: { ':inc': { N: value.toString() } },
+        ReturnValues: 'ALL_NEW',
+      }),
     );
 
     if (!data.Attributes) {
-      throw new Error("Item not found");
+      throw new Error('Item not found');
     }
 
     return convertToJavaScriptSchema(data.Attributes) as T;

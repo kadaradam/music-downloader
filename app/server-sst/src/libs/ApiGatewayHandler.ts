@@ -1,16 +1,17 @@
-import { APIGatewayEvent, APIGatewayProxyResultV2, Context } from "aws-lambda";
-import { StatusCodes } from "http-status-codes";
-import { ApiError, ApiErrorResponse } from "./ApiError";
-import { ApiErrorType } from "../types/ApiError.type";
-import { z, ZodError } from "zod";
-import { ApiResponse } from "./ApiResponse";
+import { APIGatewayEvent, APIGatewayProxyResultV2, Context } from 'aws-lambda';
+import { StatusCodes } from 'http-status-codes';
+import { ZodError, z } from 'zod';
+
+import { ApiErrorType } from '../types/ApiError.type';
+import { ApiError, ApiErrorResponse } from './ApiError';
+import { ApiResponse } from './ApiResponse';
 
 type Handler = (
   event: APIGatewayEvent,
   context: Context,
   validatedData: {
     body: Record<string, any>;
-  }
+  },
 ) =>
   | APIGatewayProxyResultV2
   | Promise<APIGatewayProxyResultV2>
@@ -28,7 +29,7 @@ export class ApiGatewayRoute {
   handler(handlerFunc: Handler) {
     return async (
       event: APIGatewayEvent,
-      context: Context
+      context: Context,
     ): Promise<APIGatewayProxyResultV2> => {
       try {
         let body = {};
@@ -44,12 +45,12 @@ export class ApiGatewayRoute {
           body,
         })) as APIGatewayProxyResultV2;
       } catch (error) {
-        console.error("Error in handler:", error);
+        console.error('Error in handler:', error);
 
-        if (error instanceof SyntaxError && error.message.includes("JSON")) {
+        if (error instanceof SyntaxError && error.message.includes('JSON')) {
           return ApiErrorResponse(error)({
             status: StatusCodes.BAD_REQUEST,
-            message: "Failed to process JSON.",
+            message: 'Failed to process JSON.',
             type: ApiErrorType.SYNTAX_ERROR,
           });
         }
@@ -58,7 +59,7 @@ export class ApiGatewayRoute {
           return ApiErrorResponse(error)({
             status: StatusCodes.BAD_REQUEST,
             message: {
-              error: "Validation error",
+              error: 'Validation error',
               details: error.errors,
             },
             type: ApiErrorType.SYNTAX_ERROR,
@@ -68,7 +69,7 @@ export class ApiGatewayRoute {
         if (error instanceof ApiError) {
           const status = error.status || StatusCodes.INTERNAL_SERVER_ERROR;
           const type = error.type || ApiErrorType.UNEXPECTED_ERROR;
-          const message = error.message || "An internal server error occurred";
+          const message = error.message || 'An internal server error occurred';
 
           return ApiErrorResponse(error)({
             status,
@@ -79,7 +80,7 @@ export class ApiGatewayRoute {
 
         return ApiErrorResponse(error as Error)({
           status: StatusCodes.INTERNAL_SERVER_ERROR,
-          message: "An internal server error occurred",
+          message: 'An internal server error occurred',
           type: ApiErrorType.UNEXPECTED_ERROR,
         });
       }

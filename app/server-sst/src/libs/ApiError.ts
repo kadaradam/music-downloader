@@ -1,5 +1,6 @@
-import { APIGatewayProxyResultV2 } from "aws-lambda";
-import { ApiErrorType } from "../types/ApiError.type";
+import { APIGatewayProxyResultV2 } from 'aws-lambda';
+
+import { ApiErrorType } from '../types/ApiError.type';
 
 export class ApiError extends Error {
   type: ApiErrorType;
@@ -25,7 +26,7 @@ export function ApiErrorResponse(error: Error): ApiErrorResponseReturnType {
     return {
       statusCode: status,
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         message: message,
