@@ -11,6 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-apigatewaymanagementapi": "^3.679.0",
+    "@aws-sdk/client-s3": "^3.679.0",
+    "@aws-sdk/s3-request-presigner": "^3.679.0",
     "sst": "^3.2.65"
   },
   "devDependencies": {

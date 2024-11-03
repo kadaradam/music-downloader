@@ -18,6 +18,13 @@ export default $config({
         allowOrigins: ["http://localhost:30001"],
       }, */
     });
+    const mediaBucket = new sst.aws.Bucket("MediaBucket", {
+      access: "public",
+      cors: {
+        allowMethods: ["GET"],
+      },
+    });
+
     convertJobApi.route("POST /api/convert/youtube", {
       handler: "src/functions/http/convert-job-api.create",
     });
@@ -28,6 +35,7 @@ export default $config({
       handler: "src/functions/http/convert-job-api.get",
     });
     convertJobApi.route("GET /api/convert/{fileId}/download", {
+      link: [mediaBucket],
       handler: "src/functions/http/convert-job-api.download",
     });
 
