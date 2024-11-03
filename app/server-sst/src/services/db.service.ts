@@ -63,19 +63,35 @@ export abstract class DBService {
   static async find<T>(
     tableName: string,
     lookupKeys: ItemProps<T>,
-    selectFields: Array<keyof T> | undefined = undefined,
+    {
+      selectFields = undefined,
+      primaryKey = undefined,
+    }: {
+      selectFields?: Array<keyof T>;
+      primaryKey?: keyof T;
+    } = {},
   ): Promise<T[]> {
-    const data = await client.send(
-      new QueryCommand({
-        TableName: tableName,
-        KeyConditionExpression: dbExpression(lookupKeys),
-        ExpressionAttributeValues: dbExpressionValues(lookupKeys),
-        ProjectionExpression: selectFields
-          ? selectFields.join(', ')
-          : undefined,
-      }),
-    );
+    const queryParams: any = {
+      TableName: tableName,
+      ExpressionAttributeNames: dbExpressionNames(lookupKeys),
+      ExpressionAttributeValues: dbExpressionValues(lookupKeys),
+      ProjectionExpression: selectFields ? selectFields.join(', ') : undefined,
+    };
 
+    if (primaryKey) {
+      const { [primaryKey]: primaryValue, ...lookupNoPrimaryKey } = lookupKeys;
+
+      queryParams.KeyConditionExpression = dbExpression({
+        [primaryKey]: primaryValue,
+      });
+      queryParams.FilterExpression = dbExpression(
+        lookupNoPrimaryKey as ItemProps<T>,
+      );
+    } else {
+      queryParams.KeyConditionExpression = dbExpression(lookupKeys);
+    }
+
+    const data = await client.send(new QueryCommand(queryParams));
     return data.Items as T[];
   }
 
@@ -87,6 +103,7 @@ export abstract class DBService {
       new QueryCommand({
         TableName: tableName,
         KeyConditionExpression: dbExpression(lookupKeys),
+        ExpressionAttributeNames: dbExpressionNames(lookupKeys),
         ExpressionAttributeValues: dbExpressionValues(lookupKeys),
       }),
     );
@@ -112,6 +129,7 @@ export abstract class DBService {
       }),
     );
 
+    // Should not happen
     if (!data.Attributes) {
       throw new Error('Item not found');
     }

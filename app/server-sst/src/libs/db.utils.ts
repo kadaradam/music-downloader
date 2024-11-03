@@ -43,14 +43,10 @@ export function dbExpression<T>(
   { update }: { update: boolean } = { update: false },
 ): string {
   const expression = Object.keys(props)
-    .map((key) => `${key} = :${key}`)
-    .join(', ');
+    .map((key) => `#${key} = :${key}`)
+    .join(update ? ', ' : ' AND ');
 
-  if (update) {
-    return `SET ${expression}`;
-  }
-
-  return expression;
+  return update ? `SET ${expression}` : expression;
 }
 
 export function dbExpressionValues<T>(
