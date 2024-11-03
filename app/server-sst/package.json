@@ -10,9 +10,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-apigatewaymanagementapi": "^3.679.0",
     "sst": "^3.2.65"
   },
   "devDependencies": {
-    "@types/aws-lambda": "8.10.145"
+    "@types/aws-lambda": "8.10.145",
+    "http-status-codes": "^2.3.0"
   }
 }
