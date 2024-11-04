@@ -29,12 +29,39 @@ export default $config({
       },
       primaryIndex: { hashKey: 'fileId' },
     });
+
     const mediaBucket = new sst.aws.Bucket('MediaBucket', {
       access: 'public',
       cors: {
+        allowHeaders: ['*'],
+        allowOrigins: ['*'],
         allowMethods: ['GET'],
       },
     });
+
+    // Delete audio assets after 1 day
+    new aws.s3.BucketLifecycleConfigurationV2('expireMediaObjects', {
+      bucket: mediaBucket.name,
+      rules: [
+        {
+          id: 'ExpireAfterOneDay',
+          status: 'Enabled',
+          expiration: { days: 1 },
+          filter: { prefix: MEDIA_BUCKET_KEY_PREFIX },
+        },
+      ],
+    });
+
+    mediaBucket.subscribe(
+      {
+        handler: 'src/functions/s3/media-expiration-subscriber.handler',
+        link: [convertJobsTable],
+      },
+      {
+        filterPrefix: MEDIA_BUCKET_KEY_PREFIX,
+        events: ['s3:ObjectRemoved:*', 's3:LifecycleExpiration:*'],
+      },
+    );
 
     convertJobApi.route('POST /api/convert/youtube', {
       link: [convertJobsTable, convertJobQueue],
