@@ -90,7 +90,6 @@ export default $config({
         MEDIA_BUCKET_NAME: mediaBucket.name,
         MEDIA_BUCKET_KEY_PREFIX,
         CONVERT_JOB_TABLE_NAME: convertJobsTable.name,
-        IS_PROD: $app.stage === 'production' ? 'true' : 'false',
       },
     });
 

@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 S3_BUCKET               = os.environ['MEDIA_BUCKET_NAME']  # Get the S3 bucket name from the environment variables
 S3_KEY                  = os.environ['MEDIA_BUCKET_KEY_PREFIX']  # Define the S3 key (path) for the uploaded file
 CONVERT_JOB_TABLE_NAME  = os.environ['CONVERT_JOB_TABLE_NAME'] # Get the DynamoDB table name from the environment variables
-IS_PROD                 = os.environ['IS_PROD']
+IS_DEV                  = os.environ['SST_DEV']
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -68,7 +68,7 @@ def download_mp3(url, output_path='downloaded_audio.mp3'):
             }
         ],
         'outtmpl': output_path,
-        'ffmpeg_location': IS_PROD == 'true' and '/opt/bin/ffmpeg' or '/opt/homebrew/bin/ffmpeg',
+        'ffmpeg_location': IS_DEV == 'true' and '/opt/homebrew/bin/ffmpeg' or '/opt/bin/ffmpeg',
     }
 
     # Download audio
