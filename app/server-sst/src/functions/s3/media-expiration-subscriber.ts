@@ -21,9 +21,12 @@ export async function handler(event: S3Event): Promise<string> {
 
 async function archiveCovertJob(objectKey: string): Promise<boolean> {
   try {
-    const fileId = objectKey.replace(`${MEDIA_BUCKET_KEY_PREFIX}/`, '');
+    const fileId = objectKey.replace(
+      new RegExp(`^${MEDIA_BUCKET_KEY_PREFIX}|\\.mp3$`, 'g'),
+      '',
+    );
 
-    console.log(`Setting file to archived: ${objectKey}`);
+    console.log(`Setting file to archived: ${fileId}`);
 
     await DBService.updateOne<ConvertJob>(
       Resource.ConvertJobsTable.name,
