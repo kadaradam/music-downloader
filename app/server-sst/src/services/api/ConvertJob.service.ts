@@ -8,7 +8,7 @@ import { MEDIA_BUCKET_KEY_PREFIX } from '../../constants';
 import { ApiError } from '../../libs/ApiError';
 import { shortId } from '../../libs/utils';
 import { ApiErrorType } from '../../types/ApiError.type';
-import { ConvertJob } from '../../types/ConvertJob.type';
+import { ConvertJob, ConvertJobStatusEnum } from '../../types/ConvertJob.type';
 import { YouTubeService } from '../YouTube.service';
 import { DBService } from '../db.service';
 
@@ -27,7 +27,7 @@ export abstract class ConvertJobService {
         videoId,
         title,
         type: 'mp3',
-        status: 'pending',
+        status: ConvertJobStatusEnum.PENDING,
         createdAt: new Date().toISOString(),
         downloadCount: 0,
       },
@@ -40,7 +40,7 @@ export abstract class ConvertJobService {
   static async restore(fileId: string): Promise<ConvertJob> {
     const items = await DBService.find<ConvertJob>(
       Resource.ConvertJobsTable.name,
-      { fileId, status: 'archived' },
+      { fileId, status: ConvertJobStatusEnum.ARCHIVED },
       { primaryKey: 'fileId' },
     );
 
@@ -55,7 +55,7 @@ export abstract class ConvertJobService {
     const updatedJob = await DBService.updateOne<ConvertJob>(
       Resource.ConvertJobsTable.name,
       { fileId },
-      { status: 'pending' },
+      { status: ConvertJobStatusEnum.PENDING },
     );
 
     const { videoId } = updatedJob;
