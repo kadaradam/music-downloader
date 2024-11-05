@@ -3,6 +3,10 @@
 from typing import Any
 
 class Resource:
+    class CompletedJobWebSocket:
+        managementEndpoint: str
+        type: str
+        url: str
     class ConvertJobApi:
         type: str
         url: str
@@ -13,6 +17,9 @@ class Resource:
         name: str
         type: str
     class MediaBucket:
+        name: str
+        type: str
+    class WsConnectionsTable:
         name: str
         type: str
 

@@ -3,11 +3,15 @@ import os
 import logging
 import json
 import boto3
+from boto3.dynamodb.types import TypeDeserializer
 from datetime import datetime, timezone
+from decimal import Decimal
 
 S3_BUCKET               = os.environ['MEDIA_BUCKET_NAME']  # Get the S3 bucket name from the environment variables
 S3_KEY                  = os.environ['MEDIA_BUCKET_KEY_PREFIX']  # Define the S3 key (path) for the uploaded file
 CONVERT_JOB_TABLE_NAME  = os.environ['CONVERT_JOB_TABLE_NAME'] # Get the DynamoDB table name from the environment variables
+CONNECTIONS_TABLE_NAME  = os.environ['WS_CONNECTIONS_TABLE_NAME'] # Get the DynamoDB table name from the environment variables
+WS_API_ENDPOINT         = os.environ['WS_API_ENDPOINT'] # Get the WebSocket URL from the environment variables
 IS_DEV                  = os.environ['SST_DEV']
 
 logger = logging.getLogger()
@@ -15,6 +19,7 @@ logger.setLevel(logging.INFO)
 
 s3_client = boto3.client('s3')
 dynamodb_client = boto3.client('dynamodb')
+apigateway_management_api = boto3.client('apigatewaymanagementapi', endpoint_url=WS_API_ENDPOINT)
 
 def handler(event, context):
     print("Starting function execution")
@@ -43,12 +48,14 @@ def process_message(message):
     try:
         download_mp3(url, file_id)
         upload_to_s3(file_name, file_id)
-        os.remove(file_name)
-        update_file_status(file_id, 'completed')
+        status = 'completed'
     except Exception as e:
         print(f"An error occurred: {e}")
-        update_file_status(file_id, 'failed')
-
+        status = 'failed'
+    finally:
+        updated_item = update_file_status(file_id, status)
+        notify_client_convert_job_completed(file_id, updated_item)
+        
         if os.path.exists(file_name):
             os.remove(file_name)
 
@@ -81,6 +88,13 @@ def upload_to_s3(file_path, key):
     """
     s3_client.upload_file(file_path, S3_BUCKET, S3_KEY + key + '.mp3')
 
+# Convert Decimal to float before dumping to JSON
+def convert_decimals(d):
+    for key, value in d.items():
+        if isinstance(value, Decimal):
+            d[key] = float(value)
+    return d
+
 def update_file_status(file_id, status='completed'):
     """
     Update the status of the file in the DynamoDB table.
@@ -105,7 +119,39 @@ def update_file_status(file_id, status='completed'):
             ':status': {'S': status},
             ':finishedAt': {'S': formatted_datetime}
         },
-        ReturnValues="UPDATED_NEW"
+        ReturnValues="ALL_NEW"
     )
 
-    return response
+    # Convert the DynamoDB structure to a normal Python dict
+    deserializer = TypeDeserializer()
+    updated_item = {k: deserializer.deserialize(v) for k, v in response.get("Attributes", {}).items()}
+
+    return updated_item
+
+def notify_client_convert_job_completed(file_id, updated_item_obj):
+    """
+    Notify the client that the convert job has been completed.
+    """
+
+    response = dynamodb_client.query(
+        TableName=CONNECTIONS_TABLE_NAME,
+        IndexName='fileIdIndex',
+        KeyConditionExpression='fileId = :fileId',
+        ExpressionAttributeValues={
+            ':fileId': {'S': file_id}
+        }
+    )
+
+    for item in response['Items']:
+        connection_id = item['connectionId'].get('S')
+
+        # Send a message to the client
+        try:
+            # Send the message to the WebSocket connection
+            apigateway_management_api.post_to_connection(
+                ConnectionId=connection_id,
+                Data=json.dumps(convert_decimals(updated_item_obj))  # Send message in a JSON format
+            )
+            print(f'Sent message to connection ID: {connection_id}')
+        except Exception as e:
+            print(f'Failed to send message to {connection_id}: {str(e)}')

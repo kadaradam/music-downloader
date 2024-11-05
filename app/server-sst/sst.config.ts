@@ -14,11 +14,18 @@ export default $config({
   },
   async run() {
     const convertJobApi = new sst.aws.ApiGatewayV2('ConvertJobApi', {
-      /*  cors: {
-        allowMethods: ["GET", "POST"],
-        allowOrigins: ["http://localhost:30001"],
-      }, */
+      cors: {
+        allowMethods: ['GET', 'POST'],
+        allowOrigins: [
+          $app.stage === 'production'
+            ? 'production-api-url'
+            : 'http://localhost:30001',
+        ],
+      },
     });
+    const notifyJobCompletedWs = new sst.aws.ApiGatewayWebSocket(
+      'CompletedJobWebSocket',
+    );
     const convertJobQueue = new sst.aws.Queue(
       'ConvertJobQueue',
       /* { fifo: true }, */
@@ -26,8 +33,28 @@ export default $config({
     const convertJobsTable = new sst.aws.Dynamo('ConvertJobsTable', {
       fields: {
         fileId: 'string',
+        status: 'string',
       },
       primaryIndex: { hashKey: 'fileId' },
+      globalIndexes: {
+        statusFileIdIndex: {
+          hashKey: 'status',
+          rangeKey: 'fileId',
+        },
+      },
+    });
+
+    const wsConnectionsTable = new sst.aws.Dynamo('WsConnectionsTable', {
+      fields: {
+        fileId: 'string',
+        connectionId: 'string',
+      },
+      primaryIndex: { hashKey: 'connectionId' },
+      globalIndexes: {
+        fileIdIndex: {
+          hashKey: 'fileId',
+        },
+      },
     });
 
     const mediaBucket = new sst.aws.Bucket('MediaBucket', {
@@ -82,7 +109,12 @@ export default $config({
 
     convertJobQueue.subscribe({
       handler: 'src/functions/queue/py/convert-queue-subscriber.handler',
-      link: [convertJobsTable, mediaBucket],
+      link: [
+        convertJobsTable,
+        wsConnectionsTable,
+        mediaBucket,
+        notifyJobCompletedWs,
+      ],
       memory: '128 MB',
       runtime: 'python3.9',
       layers: ['arn:aws:lambda:eu-central-1:722103386131:layer:ffmpeg:1'],
@@ -90,11 +122,23 @@ export default $config({
         MEDIA_BUCKET_NAME: mediaBucket.name,
         MEDIA_BUCKET_KEY_PREFIX,
         CONVERT_JOB_TABLE_NAME: convertJobsTable.name,
+        WS_CONNECTIONS_TABLE_NAME: wsConnectionsTable.name,
+        WS_API_ENDPOINT: notifyJobCompletedWs.managementEndpoint,
       },
+    });
+
+    notifyJobCompletedWs.route('$connect', {
+      handler: 'src/functions/websocket/notify.connect',
+      link: [wsConnectionsTable],
+    });
+    notifyJobCompletedWs.route('$disconnect', {
+      handler: 'src/functions/websocket/notify.disconnect',
+      link: [wsConnectionsTable],
     });
 
     return {
       apiUrl: convertJobApi.url,
+      wsUrl: notifyJobCompletedWs.url,
     };
   },
 });

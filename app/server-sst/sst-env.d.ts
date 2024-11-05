@@ -27,5 +27,9 @@ declare module "sst" {
       "name": string
       "type": "sst.aws.Bucket"
     }
+    "WsConnectionsTable": {
+      "name": string
+      "type": "sst.aws.Dynamo"
+    }
   }
 }
