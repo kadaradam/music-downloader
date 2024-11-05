@@ -1,4 +1,5 @@
 import {
+  DeleteItemCommand,
   DynamoDBClient,
   PutItemCommand,
   UpdateItemCommand,
@@ -17,10 +18,14 @@ import { ItemProps, NumberItemProp, WithoutId } from '../types/db.type';
 const client = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
 export abstract class DBService {
-  static async insert<T>(tableName: string, props: WithoutId<T>): Promise<T> {
+  static async insert<T>(
+    tableName: string,
+    props: WithoutId<T>,
+    { skipAutoId }: { skipAutoId: boolean } = { skipAutoId: false },
+  ): Promise<T> {
     const newItem = {
       ...props,
-      id: crypto.randomUUID() as string,
+      ...(!skipAutoId && { id: Math.random().toString(36).slice(2) }),
     };
 
     await client.send(
@@ -100,11 +105,9 @@ export abstract class DBService {
     lookupKeys: ItemProps<T>,
   ): Promise<boolean> {
     await client.send(
-      new QueryCommand({
+      new DeleteItemCommand({
         TableName: tableName,
-        KeyConditionExpression: dbExpression(lookupKeys),
-        ExpressionAttributeNames: dbExpressionNames(lookupKeys),
-        ExpressionAttributeValues: dbExpressionValues(lookupKeys),
+        Key: convertToDynamoSchema(lookupKeys),
       }),
     );
 
