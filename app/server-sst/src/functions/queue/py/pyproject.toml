@@ -1,0 +1,10 @@
+[project]
+name = "convert-queue-subscriber"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "boto3>=1.35.54",
+    "yt-dlp>=2024.10.22"
+]

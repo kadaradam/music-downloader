@@ -1,0 +1,28 @@
+{
+  "name": "server-sst",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-apigatewaymanagementapi": "^3.679.0",
+    "@aws-sdk/client-dynamodb": "^3.679.0",
+    "@aws-sdk/client-s3": "^3.679.0",
+    "@aws-sdk/client-sqs": "^3.679.0",
+    "@aws-sdk/lib-dynamodb": "^3.679.0",
+    "@aws-sdk/s3-request-presigner": "^3.679.0",
+    "sst": "^3.2.73",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/aws-lambda": "8.10.145",
+    "http-status-codes": "^2.3.0",
+    "prettier": "^3.3.3"
+  }
+}
